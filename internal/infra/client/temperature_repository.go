@@ -2,8 +2,10 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/Dionizio8/go-temppc/internal/entity"
 )
@@ -28,8 +30,17 @@ func NewTemperatureRepository(weatherAPIClientURL string, weatherAPIClientAPIKey
 }
 
 func (r *TemperatureRepository) GetTemperature(city string) (entity.Temperature, error) {
-	url := fmt.Sprintf("%s/v1/current.json?q=%s&lang=pt&key=%s", r.WeatherAPIClientURL, city, r.WeatherAPIClientAPIKey)
-	req, err := http.NewRequest("GET", url, nil)
+	urlW, err := url.Parse(fmt.Sprintf("%s/v1/current.json", r.WeatherAPIClientURL))
+	if err != nil {
+		return entity.Temperature{}, err
+	}
+	q := urlW.Query()
+	q.Set("q", city)
+	q.Set("lang", "pt")
+	q.Set("key", r.WeatherAPIClientAPIKey)
+	urlW.RawQuery = q.Encode()
+
+	req, err := http.NewRequest("GET", urlW.String(), nil)
 	if err != nil {
 		return entity.Temperature{}, err
 	}
@@ -39,6 +50,13 @@ func (r *TemperatureRepository) GetTemperature(city string) (entity.Temperature,
 		return entity.Temperature{}, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return entity.Temperature{}, errors.New(entity.ErrAddressNotFoundMsg)
+		}
+		return entity.Temperature{}, errors.New("error fetching temperature")
+	}
 
 	var temperature TemperatureWeatherDTO
 	err = json.NewDecoder(resp.Body).Decode(&temperature)
