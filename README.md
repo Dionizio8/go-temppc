@@ -22,6 +22,15 @@ Mensagem: ```can not find zipcode```
 
 ---
 
-# Arquivos de testes (_.http_)
+# Arquivos de Testes (_.http_)
 * [Request API Local](./api/api-local.http)
 * [Request API Google Cloud Run](./api/api-gc.http)
+
+---
+# Executar localmente
+```bash
+cd ./cmd/
+```
+```bash
+go run main.go
+```
