@@ -21,4 +21,7 @@ Código HTTP: *404*
 Mensagem: ```can not find zipcode```
 
 ---
-_Deverá ser realizado o deploy no Google Cloud Run._
+
+# Arquivos de testes (_.http_)
+* [Request API Local](./api/api-local.http)
+* [Request API Google Cloud Run](./api/api-gc.http)
